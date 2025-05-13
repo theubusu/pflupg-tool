@@ -76,7 +76,7 @@ int decrypt_upg_signature(unsigned char *sig, unsigned int sig_size, unsigned in
 	}
 	
 	if(plain_size < 52){
-		fprintf (stderr, "Error: decrypted signature too small (%u bytes) !\n", plain_size);
+		fprintf (stderr, "Error: decrypted signature too small (%lu bytes) !\n", plain_size);
 		return -1;
 	}
 	
@@ -221,7 +221,7 @@ int unpack_upg(unsigned char *data, size_t data_size){
 			return -1;
 		}
 		
-		strcpy(dest_file, "./");
+		strcpy(dest_file, "./out/");
 		strncat(dest_file, entry->filename, sizeof(dest_file) - strlen(dest_file) - 1);
 		dirc = strdup(dest_file);
 		dname = dirname(dirc);
@@ -249,11 +249,22 @@ int unpack_upg(unsigned char *data, size_t data_size){
 	return 0;
 }
 
+const char* get_auto_fw_index(const char *key) {
+    for (int i = 0; i < AUTO_FW_CNT; i++) {
+        if (strcmp(auto_fw[i][0], key) == 0) {
+            return auto_fw[i][1];
+        }
+    }
+    return NULL;
+}
+
 int main(int argc, char* argv[])
 {
 	unsigned long int upg_file_size;
 	unsigned int pubkey_idx = -1;
 	unsigned char *upg_buf = NULL;
+	unsigned char platform_code[6];
+	const char *use_key;
 	upg_header *header;
 	
 	if(argc < 2){
@@ -272,19 +283,31 @@ int main(int argc, char* argv[])
 	header = (upg_header*) upg_buf;
 	
 	printf("UPG release : %s\n", header->releaseStr);
+	strncpy((char *)platform_code, (char *)header->releaseStr, 5);
+	platform_code[5] = '\0';
+	printf("Platform code : %s\n", platform_code);
 	printf("UPG description : %s\n", header->description);
 	printf("UPG header size : %d\n", header->header_size);
 	printf("UPG data size : %d\n", header->data_size);
 	printf("UPG mask : 0x%8x\n", header->mask);
 	
 	if(header->mask & UPG_HEADER_FLAG_ENCRYPTION){
-		if(argc != 3){
-			printf("Error: this UPG seems to be encrypted. You have to provide a key name !\n");
-			return -1;
+		if(argc != 3){ // this needs to be changed when other arguments are introduced later
+			use_key = get_auto_fw_index(platform_code);
+			if (use_key) {
+				printf("Key to be used: %s\n", use_key);
+			} else {
+				printf("No key is specified for this platform. You need to specify your own.\n");
+				return -1;
+			}
+		}
+
+		if(argc == 3){
+			use_key = argv[2];
 		}
 		
 		for(pubkey_idx = 0; pubkey_idx < PUBLIC_KEYS_CNT; pubkey_idx++){
-			if(!strncmp(argv[2], public_keys[pubkey_idx][0], strlen(public_keys[pubkey_idx][0])))
+			if(!strncmp(use_key, public_keys[pubkey_idx][0], strlen(public_keys[pubkey_idx][0])))
 				break;
 		}
 		if(pubkey_idx == PUBLIC_KEYS_CNT){
