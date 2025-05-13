@@ -14,7 +14,7 @@ OBJS  = pflupg.o
 all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $(PROG) $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(PROG) $(OBJS) $(LDLIBS)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $*.c
