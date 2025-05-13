@@ -20,16 +20,6 @@ static const char *public_keys[PUBLIC_KEYS_CNT][3] = { // { name, public exponen
 	{"qf1eu", "010001", "ACD684155C7CCCB04372A8808514489FA9EE75D305987D1337420241FDBE0AE1F7CDFBB931C9D56C91D36F2CE79D222695B484FF42BCA12CE362C7C9ABBDEEC8E5D6107FADCF2D4DA5DF0693E13ACE54A18AEB21C051F6B62C075A1791985547C1CFF4FB5B6EA7E0A9405A1B2BB71EB89A9B209E0F62BF9794D673179C0E60F1"}
 };
 
-#define AUTO_FW_CNT 6
-static const char *auto_fw[AUTO_FW_CNT][2] = { // { platform code, key name to be used }
-  {"Q5551", "q5551"},
-  {"Q5553", "q5551"},
-  {"Q554E", "q5551"},
-  {"Q554M", "q5551"},
-  {"QF1EU", "qf1eu"},
-  {"QF2EU", "qf1eu"}
-};
-
 typedef struct _struct_sig {
 	unsigned char sha1[20];
 	unsigned char aes_key[32];
