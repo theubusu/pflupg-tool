@@ -6,8 +6,18 @@ pflupg-tool is an unpacking tool for Philips SmartTV firmware (Fusion platform -
 This fork adds the following to the original tool:
 - Add decryption keys for Q5551 and QF1EU platforms
 - Add automatic detection of firmware and applying the correct key
-- Add the ability to output to a custom folder (It will extract to a folder wih the name of firmware by default)
+- Add the ability to output to a custom folder (It will extract to a folder "out" by default)
 - Fix makefile
+
+## Usage
+> Usage: ./pflupg [-k key_name] [-o output_folder] upg_filename
+
+If -k is not specified, the program will automatically try to find a fitting key
+If -o is not specified, the extracted files will be output to a folder called "out" in the current directory
+
+> 2 keys available :
+> * q5551
+> * qf1eu
   
 ## Supported firmwares
 The following firmwares can be extracted using the included keys:
@@ -39,13 +49,6 @@ You can add public keys in pflupg.h file:
 You'll need Libgcrypt library to compile it. Then:
 
 > $ make
-
-## Usage
-> Usage: ./pflupg <upg_filename> [key_name]
->
-> 2 keys available :
-> * q5551
-> * qf1eu
 
 ## License
 GPL v2

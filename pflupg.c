@@ -188,7 +188,7 @@ int mkdirp(char *pathname)
 	}
 }
 
-int unpack_upg(unsigned char *data, size_t data_size){
+int unpack_upg(unsigned char *data, size_t data_size, unsigned char *out_path){
 	FILE *upg_entry_file;
 	char *dirc, *dname;
 	upg_entry_header *entry;
@@ -221,7 +221,7 @@ int unpack_upg(unsigned char *data, size_t data_size){
 			return -1;
 		}
 		
-		strcpy(dest_file, "./out/");
+		strcpy(dest_file, out_path);
 		strncat(dest_file, entry->filename, sizeof(dest_file) - strlen(dest_file) - 1);
 		dirc = strdup(dest_file);
 		dname = dirname(dirc);
@@ -260,23 +260,55 @@ const char* get_auto_fw_index(const char *key) {
 
 int main(int argc, char* argv[])
 {
+	int opt;
 	unsigned long int upg_file_size;
 	unsigned int pubkey_idx = -1;
 	unsigned char *upg_buf = NULL;
 	unsigned char platform_code[6];
-	const char *use_key;
+	const char *use_key = NULL;
+	unsigned char *out_folder = NULL;
 	upg_header *header;
+
+	while ((opt = getopt(argc, argv, "k:o:")) != -1) {
+        switch (opt) {
+            case 'k':
+                use_key = optarg;
+                break;
+            case 'o':
+				out_folder = malloc(strlen(optarg) + 2);
+				if (out_folder) {
+					strcpy(out_folder, optarg);
+					strcat(out_folder, "/");
+				} else {
+					printf("Error when allocating folder path!");
+					return -1;
+				}
+                break;
+            default:
+				int i;
+                fprintf(stderr, "Usage: %s [-k key_name] [-o output_folder] upg_filename\n", argv[0]);
+				printf("%u keys available :\n", PUBLIC_KEYS_CNT);
+				for(i = 0; i < PUBLIC_KEYS_CNT; i++)
+				printf("* %s\n", public_keys[i][0]);
+                return -1;
+        }
+    }
 	
-	if(argc < 2){
+	if (!out_folder){
+		out_folder = "out/";
+	}
+
+	if (optind >= argc) {
+        fprintf(stderr, "Error: upg_filename is required!\n");
 		int i;
-		printf("Usage: %s <upg_filename> [key_name]\n", argv[0]);
+		fprintf(stderr, "Usage: %s [-k key_name] [-o output_folder] upg_filename\n", argv[0]);
 		printf("%u keys available :\n", PUBLIC_KEYS_CNT);
 		for(i = 0; i < PUBLIC_KEYS_CNT; i++)
-			printf("* %s\n", public_keys[i][0]);
+		printf("* %s\n", public_keys[i][0]);
 		return -1;
-	}
+    }
 	
-	if(read_upg(argv[1], &upg_buf, &upg_file_size)){
+	if(read_upg(argv[optind], &upg_buf, &upg_file_size)){
 		printf("Error: cannot read upg file !\n");
 		return -1;
 	}
@@ -292,7 +324,7 @@ int main(int argc, char* argv[])
 	printf("UPG mask : 0x%8x\n", header->mask);
 	
 	if(header->mask & UPG_HEADER_FLAG_ENCRYPTION){
-		if(argc != 3){ // this needs to be changed when other arguments are introduced later
+		if(!use_key){
 			use_key = get_auto_fw_index(platform_code);
 			if (use_key) {
 				printf("Key to be used: %s\n", use_key);
@@ -300,10 +332,6 @@ int main(int argc, char* argv[])
 				printf("No key is specified for this platform. You need to specify your own.\n");
 				return -1;
 			}
-		}
-
-		if(argc == 3){
-			use_key = argv[2];
 		}
 		
 		for(pubkey_idx = 0; pubkey_idx < PUBLIC_KEYS_CNT; pubkey_idx++){
@@ -331,7 +359,7 @@ int main(int argc, char* argv[])
 		}
 	}
 	
-	if(unpack_upg(&upg_buf[header->header_size], header->data_size)){
+	if(unpack_upg(&upg_buf[header->header_size], header->data_size, out_folder)){
 		printf("Error: cannot unpack upg data !\n");
 		return -1;
 	}
