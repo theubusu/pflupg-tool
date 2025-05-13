@@ -11,10 +11,8 @@ This fork adds the following to the original tool:
 
 ## Usage
 > Usage: ./pflupg [-k key_name] [-o output_folder] upg_filename
-
-If -k is not specified, the program will automatically try to find a fitting key
-If -o is not specified, the extracted files will be output to a folder called "out" in the current directory
-
+- If -k is not specified, the program will automatically try to find a fitting key
+- If -o is not specified, the extracted files will be output to a folder called "out" in the current directory
 > 2 keys available :
 > * q5551
 > * qf1eu
