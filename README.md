@@ -20,6 +20,7 @@ This fork adds the following to the original tool:
 > * q522e
 > * q5481
 > * q5431
+> * sony1
   
 ## Supported firmwares
 The following firmwares can be extracted using the included keys:
@@ -36,6 +37,9 @@ The following firmwares can be extracted using the included keys:
 | Q554M    | 2012      | Uses Q5551 Key |
 | QF1EU    | 2012      | Key is present |
 | QF2EU    | 2013      | Uses QF1EU Key |
+
+Extra:
+- sony1 key - Can extract firmware for Sony EX301/EX302/EX401/EX402/BX300/BX400/NX500/EX600 (For some reason they used Philips' software) - You need to specify this key manually when extracting!
 
 ## Customize
 If your firmware is encrypted, and the key is not in the support list, you have to provide the corresponding public key (public exponent + modulus).
